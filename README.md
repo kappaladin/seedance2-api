@@ -1,80 +1,80 @@
-**[English](README_EN.md)** | **中文**
+**English** | **[中文](README_CN.md)**
 
-# Seedance 2.0 API 使用指南
+# Seedance 2.0 API Guide
 
-Seedance 2.0 全能模型 API 调用示例。基于 [速推AI](https://www.xskill.ai/#/v2/models?model=st-ai%2Fsuper-seed2) 平台接入字节跳动新一代 AI 视频生成模型。
+API integration examples for the Seedance 2.0 all-in-one model. Access ByteDance's next-generation AI video generation model through the [SuTui AI](https://www.xskill.ai/#/v2/models?model=st-ai%2Fsuper-seed2) platform.
 
-## 模型简介
+## Model Overview
 
 **Model ID:** `st-ai/super-seed2`
 
-Seedance 2.0 是字节跳动推出的新一代 AI 视频生成模型，核心能力包括：
+Seedance 2.0 is ByteDance's next-generation AI video generation model with the following core capabilities:
 
-- **多模态混合输入** — 支持图片/视频/音频混合输入（最多 9 张图 + 3 段视频 + 3 段音频）
-- **@引用语法** — 通过 `@图片1`、`@视频1` 等语法精确控制每个素材的作用
-- **原生音画同步** — 支持音素级口型同步（8+ 种语言）
-- **多镜头叙事** — 可从单条提示词生成多镜头连贯叙事
-- **影院级画质** — 输出最高 2K 分辨率，时长 4-15 秒，生成约 60 秒完成
+- **Multi-modal Mixed Input** — Supports mixed input of images/videos/audio (up to 9 images + 3 videos + 3 audio clips)
+- **@ Reference Syntax** — Precisely control each asset's role using `@image1`, `@video1`, etc.
+- **Native Audio-Visual Sync** — Phoneme-level lip sync support (8+ languages)
+- **Multi-shot Narrative** — Generate multi-shot coherent narratives from a single prompt
+- **Cinema-grade Quality** — Up to 2K resolution output, 4-15 seconds duration, ~60 seconds to generate
 
-## 定价信息
+## Pricing
 
-| 模式 | 价格 |
-|------|------|
-| 基础价格 | 9 积分/完成 |
-| Fast 5秒（无视频输入） | 12 积分 |
-| Fast 5秒（含视频输入） | 24 积分 |
-| 标准 5秒（含视频输入） | 30 积分 |
+| Mode | Price |
+|------|-------|
+| Base price | 9 credits/completion |
+| Fast 5s (no video input) | 12 credits |
+| Fast 5s (with video input) | 24 credits |
+| Standard 5s (with video input) | 30 credits |
 
-> 按秒计费，默认 Fast（8折）：Fast 无视频 2.4/秒、含视频 4.8/秒；标准 无视频 3/秒、含视频 6/秒（4-15 秒）
+> Billed per second, default Fast (20% off): Fast without video 2.4/sec, with video 4.8/sec; Standard without video 3/sec, with video 6/sec (4-15 sec)
 
-## 前置准备
+## Prerequisites
 
-1. 前往 [速推AI](https://www.xskill.ai) 注册账号
-2. 在 [API Key 页面](https://www.xskill.ai/#/v2/api-key) 创建 API Key
-3. 获取积分用于调用
+1. Register an account at [SuTui AI](https://www.xskill.ai)
+2. Create an API Key on the [API Key page](https://www.xskill.ai/#/v2/api-key)
+3. Obtain credits for API calls
 
-## API 调用
+## API Reference
 
-### 接口说明
+### Endpoints
 
-| 接口 | 方法 | 说明 |
-|------|------|------|
-| `/api/v3/tasks/create` | POST | 创建任务，返回 task_id |
-| `/api/v3/tasks/query` | POST | 查询任务状态和结果 |
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v3/tasks/create` | POST | Create a task, returns task_id |
+| `/api/v3/tasks/query` | POST | Query task status and results |
 
 **Base URL:** `https://api.xskill.ai`
 
-### 认证方式
+### Authentication
 
-在请求头中添加 API Key：
+Add the API Key to the request header:
 
 ```
 Authorization: Bearer sk-your-api-key
 ```
 
-### 请求参数
+### Request Parameters
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `model` | string | 是 | 模型 ID，固定为 `st-ai/super-seed2` |
-| `params.prompt` | string | 是 | 提示词，支持 `@图片1`、`@视频1` 等引用 media_files 中的文件 |
-| `params.media_files` | array | 是 | 媒体文件 URL 列表，至少 1 个。支持图片、视频、音频混合输入（视频建议不超过 15 秒） |
-| `params.aspect_ratio` | string | 否 | 画面比例，如 `16:9`、`9:16`、`1:1` |
-| `params.duration` | string | 否 | 视频时长（秒），范围 4-15 |
-| `params.model` | string | 否 | 速度模式：`Fast`（快速，默认）/ `标准` |
-| `channel` | null | 否 | 渠道，默认 null |
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `model` | string | Yes | Model ID, fixed as `st-ai/super-seed2` |
+| `params.prompt` | string | Yes | Prompt text, supports `@image1`, `@video1`, etc. to reference files in media_files |
+| `params.media_files` | array | Yes | Media file URL list, at least 1. Supports mixed input of images, videos, and audio (video recommended under 15s) |
+| `params.aspect_ratio` | string | No | Aspect ratio, e.g. `16:9`, `9:16`, `1:1` |
+| `params.duration` | string | No | Video duration (seconds), range 4-15 |
+| `params.model` | string | No | Speed mode: `Fast` (default) / `Standard` |
+| `channel` | null | No | Channel, default null |
 
-### cURL 示例
+### cURL Example
 
 ```bash
-# 创建任务
+# Create task
 curl -X POST "https://api.xskill.ai/api/v3/tasks/create" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-your-api-key" \
   -d '{
     "model": "st-ai/super-seed2",
     "params": {
-      "prompt": "@图片1 让角色参考 @视频1 的动作和运镜风格进行表演，电影级光影",
+      "prompt": "@image1 character performs following @video1 motion and camera style, cinematic lighting",
       "media_files": [
         "https://your-image-url.png",
         "https://your-video-url.mp4"
@@ -85,14 +85,14 @@ curl -X POST "https://api.xskill.ai/api/v3/tasks/create" \
     "channel": null
   }'
 
-# 查询任务结果（使用返回的 task_id）
+# Query task result (using the returned task_id)
 curl -X POST "https://api.xskill.ai/api/v3/tasks/query" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-your-api-key" \
   -d '{"task_id": "your-task-id"}'
 ```
 
-### Python 示例
+### Python Example
 
 ```python
 import requests
@@ -107,7 +107,7 @@ headers = {
 payload = {
     "model": "st-ai/super-seed2",
     "params": {
-        "prompt": "@图片1 让角色参考 @视频1 的动作和运镜风格进行表演，电影级光影",
+        "prompt": "@image1 character performs following @video1 motion and camera style, cinematic lighting",
         "media_files": [
             "https://your-image-url.png",
             "https://your-video-url.mp4"
@@ -118,40 +118,40 @@ payload = {
     "channel": None
 }
 
-# 创建任务
+# Create task
 response = requests.post(url, json=payload, headers=headers)
 result = response.json()
-print("任务创建结果:", result)
+print("Task created:", result)
 
-# 获取 task_id
+# Get task_id
 task_id = result["data"]["task_id"]
 
-# 轮询查询任务结果
+# Poll for task result
 query_url = "https://api.xskill.ai/api/v3/tasks/query"
 while True:
     query_response = requests.post(query_url, json={"task_id": task_id}, headers=headers)
     query_result = query_response.json()
     status = query_result["data"]["status"]
-    print(f"任务状态: {status}")
+    print(f"Task status: {status}")
 
     if status == "completed":
         video_url = query_result["data"]["result"]["output"]["images"][0]
-        print(f"视频地址: {video_url}")
+        print(f"Video URL: {video_url}")
         break
     elif status == "failed":
-        print("任务失败")
+        print("Task failed")
         break
 
-    time.sleep(5)  # 每 5 秒查询一次
+    time.sleep(5)  # Poll every 5 seconds
 ```
 
-### JavaScript 示例
+### JavaScript Example
 
 ```javascript
 const API_KEY = "sk-your-api-key";
 const BASE_URL = "https://api.xskill.ai";
 
-// 创建任务
+// Create task
 async function createTask() {
   const response = await fetch(`${BASE_URL}/api/v3/tasks/create`, {
     method: "POST",
@@ -162,7 +162,7 @@ async function createTask() {
     body: JSON.stringify({
       "model": "st-ai/super-seed2",
       "params": {
-        "prompt": "@图片1 让角色参考 @视频1 的动作和运镜风格进行表演，电影级光影",
+        "prompt": "@image1 character performs following @video1 motion and camera style, cinematic lighting",
         "media_files": [
           "https://your-image-url.png",
           "https://your-video-url.mp4"
@@ -175,11 +175,11 @@ async function createTask() {
   });
 
   const result = await response.json();
-  console.log("任务创建结果:", result);
+  console.log("Task created:", result);
   return result.data.task_id;
 }
 
-// 查询任务结果
+// Query task result
 async function queryTask(taskId) {
   const response = await fetch(`${BASE_URL}/api/v3/tasks/query`, {
     method: "POST",
@@ -193,33 +193,33 @@ async function queryTask(taskId) {
   return await response.json();
 }
 
-// 主流程：创建并轮询
+// Main flow: create and poll
 async function main() {
   const taskId = await createTask();
 
   while (true) {
     const result = await queryTask(taskId);
     const status = result.data.status;
-    console.log(`任务状态: ${status}`);
+    console.log(`Task status: ${status}`);
 
     if (status === "completed") {
-      console.log("视频地址:", result.data.result.output.images[0]);
+      console.log("Video URL:", result.data.result.output.images[0]);
       break;
     } else if (status === "failed") {
-      console.log("任务失败");
+      console.log("Task failed");
       break;
     }
 
-    await new Promise(resolve => setTimeout(resolve, 5000)); // 每 5 秒查询
+    await new Promise(resolve => setTimeout(resolve, 5000)); // Poll every 5 seconds
   }
 }
 
 main();
 ```
 
-### 响应格式
+### Response Format
 
-**创建任务成功：**
+**Task created successfully:**
 
 ```json
 {
@@ -231,7 +231,7 @@ main();
 }
 ```
 
-**任务查询结果：**
+**Task query result:**
 
 ```json
 {
@@ -249,38 +249,38 @@ main();
 }
 ```
 
-> **status 状态值：** `pending`（排队中）、`processing`（处理中）、`completed`（已完成）、`failed`（失败）
+> **Status values:** `pending` (queued), `processing` (in progress), `completed` (done), `failed` (error)
 
 ---
 
-## MCP 调用
+## MCP Integration
 
-Seedance 2.0 支持通过 MCP（Model Context Protocol）在 AI 编辑器中直接调用，无需手动编写 API 代码。
+Seedance 2.0 supports invocation via MCP (Model Context Protocol) directly in AI editors, without writing API code manually.
 
-### 方式一：一键安装
+### Option 1: One-click Install
 
-复制下方命令到终端执行，自动配置 MCP 环境：
+Copy and run the command below in your terminal to automatically configure the MCP environment:
 
-**Mac / Linux：**
+**Mac / Linux:**
 
 ```bash
 curl -fsSL https://api.xskill.ai/install-mcp.sh | bash -s -- YOUR_API_KEY
 ```
 
-**Windows（PowerShell）：**
+**Windows (PowerShell):**
 
 ```powershell
 irm https://api.xskill.ai/install-mcp.ps1 | iex
 ```
 
-### 方式二：手动配置编辑器
+### Option 2: Manual Editor Configuration
 
-#### Cursor 配置
+#### Cursor Configuration
 
-1. 打开 Cursor 设置（`Cmd/Ctrl + ,`）
-2. 搜索 "MCP" 并启用 MCP 功能
-3. 在项目根目录创建 `.cursor/mcp.json` 文件
-4. 粘贴以下配置：
+1. Open Cursor Settings (`Cmd/Ctrl + ,`)
+2. Search for "MCP" and enable the MCP feature
+3. Create a `.cursor/mcp.json` file in the project root
+4. Paste the following configuration:
 
 ```json
 {
@@ -300,139 +300,139 @@ irm https://api.xskill.ai/install-mcp.ps1 | iex
 }
 ```
 
-#### Claude Desktop 配置
+#### Claude Desktop Configuration
 
-在 Claude Desktop 设置中添加相同的 MCP 服务器配置即可。
+Add the same MCP server configuration in Claude Desktop settings.
 
-### MCP HTTP 端点
+### MCP HTTP Endpoint
 
-如需直接调用 MCP HTTP 接口：
+To call the MCP HTTP endpoint directly:
 
 ```
 GET https://api.xskill.ai/api/v3/mcp-http
 Authorization: Bearer YOUR_API_KEY
 ```
 
-### MCP 使用方式
+### MCP Usage
 
-配置完成后，在 AI 编辑器中直接对话即可使用：
+Once configured, simply chat in the AI editor to use it:
 
-> **用户：** 帮我用 st-ai/super-seed2 生成一张图片
+> **User:** Generate a video using st-ai/super-seed2
 >
-> **Agent：** 好的，我来帮你调用 st-ai/super-seed2 生成图片...
+> **Agent:** Sure, I'll call st-ai/super-seed2 to generate the video...
 
-**提示：**
-- MCP 会自动识别模型能力并调用对应工具
-- 无需手动传入参数，Agent 会智能提取
-- 支持多轮对话持续优化结果
+**Tips:**
+- MCP automatically identifies model capabilities and calls the corresponding tools
+- No need to manually pass parameters — the Agent extracts them intelligently
+- Supports multi-turn conversations for iterative refinement
 
 ---
 
-## MCP + Cursor Skills：AI 自动分镜创作
+## MCP + Cursor Skills: AI-Powered Storyboard Creation
 
-除了直接通过 MCP 调用 API，你还可以安装 **Cursor Skills**，让 AI Agent 自动完成从创意到成片的全流程——无需手动编写任何代码或参数。
+Beyond calling the API directly via MCP, you can install **Cursor Skills** to let the AI Agent automate the entire workflow from idea to finished video — no manual coding or parameters required.
 
-### 什么是 Cursor Skills？
+### What are Cursor Skills?
 
-Cursor Skills 是 Cursor 编辑器中的可复用 AI 工作流模板。安装后，AI Agent 会自动识别你的意图，按照专业的分镜流程引导你完成视频创作：
+Cursor Skills are reusable AI workflow templates for the Cursor editor. Once installed, the AI Agent automatically recognizes your intent and guides you through a professional storyboarding process:
 
 ```
-用户创意 → 信息收集 → 分镜设计 → 生成参考图 → 构建提示词 → 提交视频任务 → 轮询结果 → 返回视频
+Your Idea → Info Gathering → Storyboard Design → Generate Reference Images → Build Prompt → Submit Video Task → Poll Results → Return Video
 ```
 
-### 安装 Skill
+### Install the Skill
 
-**方式一：克隆仓库**
+**Option 1: Clone the repository**
 
 ```bash
-# 克隆本仓库
+# Clone this repo
 git clone https://github.com/siliconflow/seedance2-api.git
 
-# 复制 skill 到你的项目
+# Copy the skill to your project
 cp -r seedance2-api/.cursor/skills/seedance-storyboard/ your-project/.cursor/skills/seedance-storyboard/
 ```
 
-**方式二：手动创建**
+**Option 2: Manual setup**
 
-在你的项目中创建 `.cursor/skills/seedance-storyboard/` 目录，将本仓库中的 `SKILL.md` 和 `reference.md` 放入其中。
+Create a `.cursor/skills/seedance-storyboard/` directory in your project and copy `SKILL.md` and `reference.md` from this repo into it.
 
-> **前提条件：** 已安装 Cursor 编辑器，已配置 MCP（参考上方"MCP 调用"章节），速推AI 账号已有足够积分。
+> **Prerequisites:** Cursor editor installed, MCP configured (see "MCP Integration" section above), SuTui AI account with sufficient credits.
 
-### 使用方式
+### How to Use
 
-配置完成后，在 Cursor 中直接用自然语言描述你的创意即可：
-
-```
-用户：帮我做一个宇航员在火星行走的 15 秒科幻短片
-
-Agent 自动执行：
-1. 收集信息（时长、比例、风格、素材情况）
-2. 用 Seedream 4.5 生成宇航员和火星场景参考图
-3. 构建专业分镜提示词（时间轴 + 镜头语言 + 声音设计）
-4. 提交 Seedance 2.0 视频生成任务
-5. 自动轮询并返回生成的视频
-```
-
-### 完整工作流
-
-| 步骤 | 说明 | 使用的模型/工具 |
-|------|------|----------------|
-| 信息收集 | 收集时长、比例、风格、素材等 | Agent 对话引导 |
-| 参考图生成 | 生成角色图、场景图、首帧/尾帧 | Seedream 4.5（文生图/图像编辑） |
-| 分镜构建 | 按时间轴编写专业镜头语言 | 内置分镜模板 |
-| 视频生成 | 提交最终提示词和素材 | Seedance 2.0 |
-| 结果获取 | 自动轮询任务状态 | MCP get_task |
-
-### 对话示例
+Once configured, simply describe your creative idea in natural language within Cursor:
 
 ```
-用户：做一个咖啡品牌的 15 秒广告，高端商业风格
+User: Create a 15-second sci-fi clip of an astronaut walking on Mars
 
-Agent：好的！需要确认几个信息：
-  - 画面比例：推荐 16:9（横屏广告）
-  - 是否有现成的产品图片？
-  - 品牌名称和 slogan？
-
-用户：16:9，没有现成图片，品牌叫 Lucky Coffee
-
-Agent：
-  1. 正在用 Seedream 4.5 生成咖啡杯特写图和品牌场景图...
-  2. 图片生成完成，开始构建分镜：
-     0-3秒：微距特写，咖啡液缓缓注入杯中，蒸汽升腾
-     3-6秒：中景环绕，手握咖啡杯，阳光洒在桌面
-     6-10秒：推镜头至咖啡豆，一粒咖啡豆飘落
-     10-12秒：画面黑屏转场
-     12-15秒：品牌文字渐显 "Lucky Coffee"
-  3. 提交 Seedance 2.0 视频任务...
-  4. 视频生成中，预计 10 分钟...
-  5. ✅ 视频生成完成！[视频链接]
+Agent automatically:
+1. Gathers info (duration, aspect ratio, style, available assets)
+2. Generates astronaut and Mars landscape reference images with Seedream 4.5
+3. Builds professional storyboard prompts (timeline + camera language + sound design)
+4. Submits Seedance 2.0 video generation task
+5. Polls and returns the generated video
 ```
 
-### 支持的创作场景
+### Full Workflow
 
-| 场景 | 说明 | 示例 |
-|------|------|------|
-| 叙事故事 | 情感短片、微电影 | "男人下班回家的温情故事" |
-| 产品广告 | 品牌宣传、电商视频 | "咖啡品牌 15 秒广告" |
-| 角色动作 | 武侠、科幻、舞蹈 | "武侠风格双人对打" |
-| 风景旅拍 | 自然风光、城市街拍 | "日落海边漫步" |
-| 视频延长 | 在已有视频基础上续拍 | "将这个视频延长 10 秒" |
-| 剧情颠覆 | 修改已有视频的剧情 | "把结局改成反转" |
-| 创意转场 | 多场景穿梭 | "科幻世界穿梭转场" |
+| Step | Description | Model/Tool |
+|------|-------------|------------|
+| Info Gathering | Collect duration, aspect ratio, style, assets | Agent conversation |
+| Reference Image Generation | Generate character, scene, first/last frame images | Seedream 4.5 (text-to-image / image editing) |
+| Storyboard Construction | Write professional shot list with timeline | Built-in storyboard templates |
+| Video Generation | Submit final prompt and assets | Seedance 2.0 |
+| Result Retrieval | Auto-poll task status | MCP get_task |
 
-> **提示：** Skill 内置了丰富的分镜模板（叙事类、产品类、动作类、风景类等）和镜头运动词汇表，Agent 会根据你的需求自动选择最合适的模板。
+### Conversation Example
+
+```
+User: Make a 15-second high-end coffee brand commercial
+
+Agent: Sure! Let me confirm a few details:
+  - Aspect ratio: 16:9 recommended for landscape ads
+  - Do you have existing product photos?
+  - Brand name and slogan?
+
+User: 16:9, no existing photos, brand is Lucky Coffee
+
+Agent:
+  1. Generating coffee cup close-up and brand scene images with Seedream 4.5...
+  2. Images ready. Building storyboard:
+     0-3s: Macro close-up, coffee slowly pouring into cup, steam rising
+     3-6s: Medium orbit shot, hand holding coffee cup, sunlight on table
+     6-10s: Push into coffee beans, a single bean falling from above
+     10-12s: Black screen transition
+     12-15s: Brand text fades in "Lucky Coffee"
+  3. Submitting Seedance 2.0 video task...
+  4. Video generating, estimated 10 minutes...
+  5. ✅ Video complete! [Video URL]
+```
+
+### Supported Creative Scenarios
+
+| Scenario | Description | Example |
+|----------|-------------|---------|
+| Narrative Story | Emotional shorts, micro-films | "A heartwarming story of a man coming home" |
+| Product Commercial | Brand promotion, e-commerce video | "15-second coffee brand ad" |
+| Character Action | Martial arts, sci-fi, dance | "Wuxia-style sword duel" |
+| Scenic Travel | Nature, cityscape, travel vlog | "Sunset beach walk" |
+| Video Extension | Continue from an existing video | "Extend this video by 10 seconds" |
+| Plot Twist | Modify an existing video's story | "Change the ending to a plot twist" |
+| Creative Transition | Multi-scene traversal | "Sci-fi world portal transitions" |
+
+> **Tip:** The Skill includes rich storyboard templates (narrative, product, action, scenic, etc.) and a camera movement glossary. The Agent automatically selects the best-fitting template for your needs.
 
 ---
 
-## 使用案例
+## Use Cases
 
-### 案例 1：角色动作迁移（图片+视频）
+### Case 1: Character Motion Transfer (Image + Video)
 
-将图片中的角色按照视频的动作和运镜风格进行表演。
+Make the character in an image perform actions following a reference video's motion and camera style.
 
 ```json
 {
-  "prompt": "@图片1 让角色参考 @视频1 的动作和运镜风格进行表演，电影级光影",
+  "prompt": "@image1 character performs following @video1 motion and camera style, cinematic lighting",
   "media_files": [
     "https://your-character-image.png",
     "https://your-reference-video.mp4"
@@ -442,13 +442,13 @@ Agent：
 }
 ```
 
-### 案例 2：单图生成视频
+### Case 2: Single Image to Video
 
-从单张图片生成动态视频。
+Generate a dynamic video from a single image.
 
 ```json
 {
-  "prompt": "@图片1 角色在森林中缓步行走，阳光透过树叶洒下斑驳光影，微风吹动发丝",
+  "prompt": "@image1 character walks slowly through a forest, sunlight filters through leaves casting dappled shadows, breeze gently moves hair",
   "media_files": [
     "https://your-character-image.png"
   ],
@@ -457,24 +457,24 @@ Agent：
 }
 ```
 
-### 更多玩法
+### More Examples
 
-| 场景 | prompt 示例 | 输入素材 |
-|------|-------------|----------|
-| 角色动作迁移 | `@图片1 让角色参考 @视频1 的动作进行表演` | 1 张图 + 1 段视频 |
-| 单图动态化 | `@图片1 角色缓缓转头微笑，微风吹动头发` | 1 张图 |
-| 多角色互动 | `@图片1 和 @图片2 两个角色面对面交谈` | 2 张图 |
-| 音频驱动口型 | `@图片1 角色说话，配合 @音频1 的内容` | 1 张图 + 1 段音频 |
-| 场景转换 | `从 @图片1 的场景平滑过渡到 @图片2 的场景` | 2 张图 |
+| Scenario | Prompt Example | Input Assets |
+|----------|---------------|--------------|
+| Motion transfer | `@image1 character performs following @video1 actions` | 1 image + 1 video |
+| Single image animation | `@image1 character slowly turns head and smiles, breeze moves hair` | 1 image |
+| Multi-character interaction | `@image1 and @image2 two characters talking face to face` | 2 images |
+| Audio-driven lip sync | `@image1 character speaks, matching @audio1 content` | 1 image + 1 audio |
+| Scene transition | `Smooth transition from @image1 scene to @image2 scene` | 2 images |
 
 ---
 
-## 相关链接
+## Links
 
-- [速推AI 官网](https://www.xskill.ai)
-- [Seedance 2.0 模型页面](https://www.xskill.ai/#/v2/models?model=st-ai%2Fsuper-seed2)
-- [API Key 管理](https://www.xskill.ai/#/v2/api-key)
-- [任务列表](https://www.xskill.ai/#/v2/tasks)
+- [SuTui AI Website](https://www.xskill.ai)
+- [Seedance 2.0 Model Page](https://www.xskill.ai/#/v2/models?model=st-ai%2Fsuper-seed2)
+- [API Key Management](https://www.xskill.ai/#/v2/api-key)
+- [Task List](https://www.xskill.ai/#/v2/tasks)
 
 ## License
 
