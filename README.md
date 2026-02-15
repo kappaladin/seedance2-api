@@ -11,7 +11,8 @@ API integration examples for the Seedance 2.0 all-in-one model. Access ByteDance
 Seedance 2.0 is ByteDance's next-generation AI video generation model with the following core capabilities:
 
 - **Multi-modal Mixed Input** — Supports mixed input of images/videos/audio (up to 9 images + 3 videos + 3 audio clips)
-- **@ Reference Syntax** — Precisely control each asset's role using `@image1`, `@video1`, etc.
+- **@ Reference Syntax** — Precisely control each asset's role using `@image_file_1`, `@video_file_1`, `@audio_file_1` (backward compatible with `@图片1`, `@视频1`)
+- **Two Function Modes** — Omni Reference (multi-modal mixing) and First/Last Frames (image-to-video)
 - **Native Audio-Visual Sync** — Phoneme-level lip sync support (8+ languages)
 - **Multi-shot Narrative** — Generate multi-shot coherent narratives from a single prompt
 - **Cinema-grade Quality** — Up to 2K resolution output, 4-15 seconds duration, ~60 seconds to generate
@@ -52,37 +53,71 @@ Add the API Key to the request header:
 Authorization: Bearer sk-your-api-key
 ```
 
+### Function Modes
+
+Seedance 2.0 supports two function modes:
+
+| Mode | Description | Asset Parameters |
+|------|-------------|-----------------|
+| `omni_reference` | **Omni Reference (default)** — Multi-modal mixing with separate image/video/audio arrays | `image_files`, `video_files`, `audio_files` |
+| `first_last_frames` | **First/Last Frames** — Text-to-video or image-to-video with first/last frame control | `filePaths` |
+
 ### Request Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `model` | string | Yes | Model ID, fixed as `st-ai/super-seed2` |
-| `params.prompt` | string | Yes | Prompt text, supports `@image1`, `@video1`, etc. to reference files in media_files |
-| `params.media_files` | array | Yes | Media file URL list, at least 1. Supports mixed input of images, videos, and audio (video recommended under 15s) |
-| `params.aspect_ratio` | string | No | Aspect ratio, e.g. `16:9`, `9:16`, `1:1` |
-| `params.duration` | string | No | Video duration (seconds), range 4-15 |
-| `params.model` | string | No | Speed mode: `Fast` (default) / `Standard` |
-| `channel` | null | No | Channel, default null |
+| `params.model` | string | No | Speed mode: `seedance_2.0_fast` (fast, default) / `seedance_2.0` (standard) |
+| `params.prompt` | string | Yes | Prompt text. Supports `@image_file_1`, `@video_file_1`, `@audio_file_1` to reference assets (also compatible with `@图片1`, `@视频1`, `@音频1`) |
+| `params.functionMode` | string | No | Function mode: `omni_reference` (default) / `first_last_frames` |
+| `params.ratio` | string | No | Aspect ratio: `21:9` / `16:9` / `4:3` / `1:1` / `3:4` / `9:16` |
+| `params.duration` | integer | No | Video duration (seconds), 4-15 integer. Default `5` |
+| `params.image_files` | array | No | Reference image URL array (omni_reference mode, max 9). Array element N corresponds to `@image_file_N` |
+| `params.video_files` | array | No | Reference video URL array (omni_reference mode, max 3, total ≤ 15s). Array element N corresponds to `@video_file_N` |
+| `params.audio_files` | array | No | Reference audio URL array (omni_reference mode, max 3). Array element N corresponds to `@audio_file_N` |
+| `params.filePaths` | array | No | Image URL array (first_last_frames mode). 0 items: text-to-video; 1 item: first frame; 2 items: first + last frame |
 
 ### cURL Example
 
 ```bash
-# Create task
+# Example 1: Omni Reference mode (image + video)
 curl -X POST "https://api.xskill.ai/api/v3/tasks/create" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-your-api-key" \
   -d '{
     "model": "st-ai/super-seed2",
     "params": {
-      "prompt": "@image1 character performs following @video1 motion and camera style, cinematic lighting",
-      "media_files": [
-        "https://your-image-url.png",
-        "https://your-video-url.mp4"
+      "model": "seedance_2.0_fast",
+      "prompt": "@image_file_1 character performs following @video_file_1 motion and camera style, cinematic lighting",
+      "functionMode": "omni_reference",
+      "image_files": [
+        "https://your-character-image.png"
       ],
-      "aspect_ratio": "16:9",
-      "duration": "5"
-    },
-    "channel": null
+      "video_files": [
+        "https://your-reference-video.mp4"
+      ],
+      "ratio": "16:9",
+      "duration": 5
+    }
+  }'
+
+# Example 2: First/Last Frames mode
+curl -X POST "https://api.xskill.ai/api/v3/tasks/create" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sk-your-api-key" \
+  -d '{
+    "model": "st-ai/super-seed2",
+    "params": {
+      "model": "seedance_2.0_fast",
+      "prompt": "Smooth cinematic transition from first frame to last frame, elegant lighting",
+      "functionMode": "first_last_frames",
+      "filePaths": [
+        "https://your-first-frame.png",
+        "https://your-last-frame.png"
+      ],
+      "ratio": "16:9",
+      "duration": 5
+    }
   }'
 
 # Query task result (using the returned task_id)
@@ -104,18 +139,22 @@ headers = {
     "Authorization": "Bearer sk-your-api-key"
 }
 
+# Omni Reference mode: image + video
 payload = {
     "model": "st-ai/super-seed2",
     "params": {
-        "prompt": "@image1 character performs following @video1 motion and camera style, cinematic lighting",
-        "media_files": [
-            "https://your-image-url.png",
-            "https://your-video-url.mp4"
+        "model": "seedance_2.0_fast",
+        "prompt": "@image_file_1 character performs following @video_file_1 motion and camera style, cinematic lighting",
+        "functionMode": "omni_reference",
+        "image_files": [
+            "https://your-character-image.png"
         ],
-        "aspect_ratio": "16:9",
-        "duration": "5"
-    },
-    "channel": None
+        "video_files": [
+            "https://your-reference-video.mp4"
+        ],
+        "ratio": "16:9",
+        "duration": 5
+    }
 }
 
 # Create task
@@ -151,7 +190,7 @@ while True:
 const API_KEY = "sk-your-api-key";
 const BASE_URL = "https://api.xskill.ai";
 
-// Create task
+// Create task (Omni Reference mode)
 async function createTask() {
   const response = await fetch(`${BASE_URL}/api/v3/tasks/create`, {
     method: "POST",
@@ -160,17 +199,20 @@ async function createTask() {
       "Authorization": `Bearer ${API_KEY}`
     },
     body: JSON.stringify({
-      "model": "st-ai/super-seed2",
-      "params": {
-        "prompt": "@image1 character performs following @video1 motion and camera style, cinematic lighting",
-        "media_files": [
-          "https://your-image-url.png",
-          "https://your-video-url.mp4"
+      model: "st-ai/super-seed2",
+      params: {
+        model: "seedance_2.0_fast",
+        prompt: "@image_file_1 character performs following @video_file_1 motion and camera style, cinematic lighting",
+        functionMode: "omni_reference",
+        image_files: [
+          "https://your-character-image.png"
         ],
-        "aspect_ratio": "16:9",
-        "duration": "5"
-      },
-      "channel": null
+        video_files: [
+          "https://your-reference-video.mp4"
+        ],
+        ratio: "16:9",
+        duration: 5
+      }
     })
   });
 
@@ -405,7 +447,7 @@ Agent:
      12-15s: Brand text fades in "Lucky Coffee"
   3. Submitting Seedance 2.0 video task...
   4. Video generating, estimated 10 minutes...
-  5. ✅ Video complete! [Video URL]
+  5. Video complete! [Video URL]
 ```
 
 ### Supported Creative Scenarios
@@ -419,6 +461,7 @@ Agent:
 | Video Extension | Continue from an existing video | "Extend this video by 10 seconds" |
 | Plot Twist | Modify an existing video's story | "Change the ending to a plot twist" |
 | Creative Transition | Multi-scene traversal | "Sci-fi world portal transitions" |
+| First/Last Frames | Control start and end frames | "Sunrise to sunset time-lapse" |
 
 > **Tip:** The Skill includes rich storyboard templates (narrative, product, action, scenic, etc.) and a camera movement glossary. The Agent automatically selects the best-fitting template for your needs.
 
@@ -426,46 +469,88 @@ Agent:
 
 ## Use Cases
 
-### Case 1: Character Motion Transfer (Image + Video)
+### Case 1: Character Motion Transfer (Omni Reference — Image + Video)
 
 Make the character in an image perform actions following a reference video's motion and camera style.
 
 ```json
 {
-  "prompt": "@image1 character performs following @video1 motion and camera style, cinematic lighting",
-  "media_files": [
-    "https://your-character-image.png",
-    "https://your-reference-video.mp4"
-  ],
-  "aspect_ratio": "16:9",
-  "duration": "5"
+  "model": "st-ai/super-seed2",
+  "params": {
+    "prompt": "@image_file_1 character performs following @video_file_1 motion and camera style, cinematic lighting",
+    "functionMode": "omni_reference",
+    "image_files": ["https://your-character-image.png"],
+    "video_files": ["https://your-reference-video.mp4"],
+    "ratio": "16:9",
+    "duration": 5
+  }
 }
 ```
 
-### Case 2: Single Image to Video
+### Case 2: Single Image to Video (Omni Reference)
 
 Generate a dynamic video from a single image.
 
 ```json
 {
-  "prompt": "@image1 character walks slowly through a forest, sunlight filters through leaves casting dappled shadows, breeze gently moves hair",
-  "media_files": [
-    "https://your-character-image.png"
-  ],
-  "aspect_ratio": "9:16",
-  "duration": "8"
+  "model": "st-ai/super-seed2",
+  "params": {
+    "prompt": "@image_file_1 character walks slowly through a forest, sunlight filters through leaves casting dappled shadows, breeze gently moves hair",
+    "functionMode": "omni_reference",
+    "image_files": ["https://your-character-image.png"],
+    "ratio": "9:16",
+    "duration": 8
+  }
+}
+```
+
+### Case 3: First/Last Frame Video
+
+Generate a video that transitions from a first frame image to a last frame image.
+
+```json
+{
+  "model": "st-ai/super-seed2",
+  "params": {
+    "prompt": "Smooth cinematic transition, elegant camera movement, natural lighting changes",
+    "functionMode": "first_last_frames",
+    "filePaths": [
+      "https://your-first-frame.png",
+      "https://your-last-frame.png"
+    ],
+    "ratio": "16:9",
+    "duration": 5
+  }
+}
+```
+
+### Case 4: Audio-driven Lip Sync (Omni Reference — Image + Audio)
+
+```json
+{
+  "model": "st-ai/super-seed2",
+  "params": {
+    "prompt": "@image_file_1 character speaks naturally, matching @audio_file_1 content with expressive lip sync",
+    "functionMode": "omni_reference",
+    "image_files": ["https://your-character-image.png"],
+    "audio_files": ["https://your-audio-file.mp3"],
+    "ratio": "16:9",
+    "duration": 5
+  }
 }
 ```
 
 ### More Examples
 
-| Scenario | Prompt Example | Input Assets |
-|----------|---------------|--------------|
-| Motion transfer | `@image1 character performs following @video1 actions` | 1 image + 1 video |
-| Single image animation | `@image1 character slowly turns head and smiles, breeze moves hair` | 1 image |
-| Multi-character interaction | `@image1 and @image2 two characters talking face to face` | 2 images |
-| Audio-driven lip sync | `@image1 character speaks, matching @audio1 content` | 1 image + 1 audio |
-| Scene transition | `Smooth transition from @image1 scene to @image2 scene` | 2 images |
+| Scenario | Prompt Example | Function Mode | Input Assets |
+|----------|---------------|---------------|--------------|
+| Motion transfer | `@image_file_1 character performs following @video_file_1 actions` | omni_reference | image_files + video_files |
+| Single image animation | `@image_file_1 character slowly turns head and smiles, breeze moves hair` | omni_reference | image_files |
+| Multi-character interaction | `@image_file_1 and @image_file_2 two characters talking face to face` | omni_reference | image_files |
+| Audio-driven lip sync | `@image_file_1 character speaks, matching @audio_file_1 content` | omni_reference | image_files + audio_files |
+| Scene transition | `Smooth transition from @image_file_1 scene to @image_file_2 scene` | omni_reference | image_files |
+| First/last frame | `Cinematic transition from start to end` | first_last_frames | filePaths |
+| Text-to-video | `A sunset over the ocean, waves gently crashing` | first_last_frames | (none) |
 
 ---
 

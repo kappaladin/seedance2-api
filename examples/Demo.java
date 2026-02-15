@@ -136,8 +136,8 @@ public class Demo {
     // 简易 JSON 构建
     // ============================================================
 
-    /** 构建媒体文件 JSON 数组 */
-    private static String buildMediaArray(String... urls) {
+    /** 构建 JSON 数组字符串 */
+    private static String buildJsonArray(String... urls) {
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < urls.length; i++) {
             if (i > 0) sb.append(",");
@@ -147,20 +147,34 @@ public class Demo {
         return sb.toString();
     }
 
-    /** 构建创建任务的 JSON 请求体 */
-    private static String buildCreatePayload(String prompt, String mediaArray,
-                                             String aspectRatio, String duration, String mode) {
-        return "{"
-                + "\"model\":\"" + MODEL_ID + "\","
-                + "\"params\":{"
+    /** 构建全能模式（omni_reference）的创建任务 JSON */
+    private static String buildOmniPayload(String prompt, String imageFiles,
+                                            String videoFiles, String audioFiles,
+                                            String ratio, int duration, String mode) {
+        StringBuilder params = new StringBuilder();
+        params.append("\"prompt\":\"").append(prompt).append("\",");
+        params.append("\"functionMode\":\"omni_reference\",");
+        params.append("\"ratio\":\"").append(ratio).append("\",");
+        params.append("\"duration\":").append(duration).append(",");
+        params.append("\"model\":\"").append(mode).append("\"");
+        if (imageFiles != null) params.append(",\"image_files\":").append(imageFiles);
+        if (videoFiles != null) params.append(",\"video_files\":").append(videoFiles);
+        if (audioFiles != null) params.append(",\"audio_files\":").append(audioFiles);
+
+        return "{\"model\":\"" + MODEL_ID + "\",\"params\":{" + params + "}}";
+    }
+
+    /** 构建首尾帧模式（first_last_frames）的创建任务 JSON */
+    private static String buildFramesPayload(String prompt, String filePaths,
+                                              String ratio, int duration, String mode) {
+        return "{\"model\":\"" + MODEL_ID + "\",\"params\":{"
                 + "\"prompt\":\"" + prompt + "\","
-                + "\"media_files\":" + mediaArray + ","
-                + "\"aspect_ratio\":\"" + aspectRatio + "\","
-                + "\"duration\":\"" + duration + "\","
+                + "\"functionMode\":\"first_last_frames\","
+                + "\"ratio\":\"" + ratio + "\","
+                + "\"duration\":" + duration + ","
                 + "\"model\":\"" + mode + "\""
-                + "},"
-                + "\"channel\":null"
-                + "}";
+                + (filePaths != null ? ",\"filePaths\":" + filePaths : "")
+                + "}}";
     }
 
     // ============================================================
@@ -168,22 +182,63 @@ public class Demo {
     // ============================================================
 
     /**
-     * 创建视频生成任务
+     * 创建视频生成任务（全能模式）
      *
-     * @param prompt      提示词
-     * @param mediaFiles  媒体文件 URL 数组
-     * @param aspectRatio 画面比例
-     * @param duration    视频时长（秒）
-     * @param mode        速度模式：seedance_2.0_fast（快速）/ seedance_2.0（标准）
+     * @param prompt      提示词，支持 @image_file_1/@video_file_1/@audio_file_1 引用
+     * @param imageFiles  参考图片 URL 数组（最多 9 张）
+     * @param videoFiles  参考视频 URL 数组（最多 3 个，总时长 ≤ 15s）
+     * @param audioFiles  参考音频 URL 数组（最多 3 个）
+     * @param ratio       画面比例：21:9 / 16:9 / 4:3 / 1:1 / 3:4 / 9:16
+     * @param duration    视频时长（秒），4-15
+     * @param mode        速度模式：seedance_2.0_fast / seedance_2.0
      * @return task_id
      */
-    public String createTask(String prompt, String[] mediaFiles,
-                             String aspectRatio, String duration, String mode) throws IOException {
-        String mediaArray = buildMediaArray(mediaFiles);
-        String payload = buildCreatePayload(prompt, mediaArray, aspectRatio, duration, mode);
+    public String createOmniTask(String prompt, String[] imageFiles, String[] videoFiles,
+                                  String[] audioFiles, String ratio, int duration,
+                                  String mode) throws IOException {
+        String imgArray = imageFiles != null ? buildJsonArray(imageFiles) : null;
+        String vidArray = videoFiles != null ? buildJsonArray(videoFiles) : null;
+        String audArray = audioFiles != null ? buildJsonArray(audioFiles) : null;
+        String payload = buildOmniPayload(prompt, imgArray, vidArray, audArray, ratio, duration, mode);
 
+        System.out.println("[创建任务] 功能模式: omni_reference");
         System.out.println("[创建任务] 提示词: " + prompt);
-        System.out.println("[创建任务] 媒体文件: " + String.join(", ", mediaFiles));
+        if (imageFiles != null) System.out.println("[创建任务] 参考图片: " + String.join(", ", imageFiles));
+        if (videoFiles != null) System.out.println("[创建任务] 参考视频: " + String.join(", ", videoFiles));
+        if (audioFiles != null) System.out.println("[创建任务] 参考音频: " + String.join(", ", audioFiles));
+
+        String response = postRequest(CREATE_URL, payload);
+
+        String code = jsonGetString(response, "code");
+        if (!"200".equals(code)) {
+            throw new RuntimeException("创建任务失败: " + response);
+        }
+
+        String taskId = jsonGetString(response, "task_id");
+        String price = jsonGetString(response, "price");
+        System.out.println("[创建任务] 成功! task_id=" + taskId + ", 消耗积分=" + (price != null ? price : "未知"));
+
+        return taskId;
+    }
+
+    /**
+     * 创建首尾帧视频任务
+     *
+     * @param prompt     提示词
+     * @param filePaths  图片 URL 数组（0张=文生视频，1张=首帧，2张=首尾帧）
+     * @param ratio      画面比例
+     * @param duration   视频时长（秒），4-15
+     * @param mode       速度模式
+     * @return task_id
+     */
+    public String createFramesTask(String prompt, String[] filePaths, String ratio,
+                                    int duration, String mode) throws IOException {
+        String pathArray = filePaths != null ? buildJsonArray(filePaths) : null;
+        String payload = buildFramesPayload(prompt, pathArray, ratio, duration, mode);
+
+        System.out.println("[创建任务] 功能模式: first_last_frames");
+        System.out.println("[创建任务] 提示词: " + prompt);
+        if (filePaths != null) System.out.println("[创建任务] 首尾帧: " + String.join(", ", filePaths));
 
         String response = postRequest(CREATE_URL, payload);
 
@@ -226,7 +281,7 @@ public class Demo {
             System.out.println("[轮询] " + (elapsed / 1000) + "s - 状态: " + status);
 
             if ("completed".equals(status)) {
-                String videoUrl = jsonGetString(response, "video_url");
+                String videoUrl = jsonGetFirstArrayElement(response, "images");
                 System.out.println("\n[完成] 视频生成成功!");
                 System.out.println("[完成] 视频地址: " + videoUrl);
                 return videoUrl;
@@ -248,50 +303,66 @@ public class Demo {
     // 使用示例
     // ============================================================
 
-    /** 示例 1: 单图生成视频 */
+    /** 示例 1: 单图生成视频（全能模式） */
     public void exampleSingleImage() throws Exception {
         System.out.println("\n" + "=".repeat(60));
-        System.out.println("示例 1: 单图生成视频");
+        System.out.println("示例 1: 单图生成视频（全能模式）");
         System.out.println("=".repeat(60));
 
-        String taskId = createTask(
-                "@图片1 角色在森林中缓步行走，阳光透过树叶洒下斑驳光影，微风吹动发丝",
+        String taskId = createOmniTask(
+                "@image_file_1 角色在森林中缓步行走，阳光透过树叶洒下斑驳光影，微风吹动发丝",
                 new String[]{"https://your-character-image.png"},
-                "9:16", "8", "seedance_2.0_fast"
+                null, null,
+                "9:16", 8, "seedance_2.0_fast"
         );
         waitForResult(taskId);
     }
 
-    /** 示例 2: 角色动作迁移（图片 + 视频） */
+    /** 示例 2: 角色动作迁移（图片 + 视频，全能模式） */
     public void exampleImageAndVideo() throws Exception {
         System.out.println("\n" + "=".repeat(60));
         System.out.println("示例 2: 角色动作迁移（图片 + 视频）");
         System.out.println("=".repeat(60));
 
-        String taskId = createTask(
-                "@图片1 让角色参考 @视频1 的动作和运镜风格进行表演，电影级光影",
-                new String[]{
-                        "https://your-character-image.png",
-                        "https://your-reference-video.mp4"
-                },
-                "16:9", "5", "seedance_2.0_fast"
+        String taskId = createOmniTask(
+                "@image_file_1 中的人物按照 @video_file_1 的动作和运镜风格进行表演，电影级光影",
+                new String[]{"https://your-character-image.png"},
+                new String[]{"https://your-reference-video.mp4"},
+                null,
+                "16:9", 5, "seedance_2.0_fast"
         );
         waitForResult(taskId);
     }
 
-    /** 示例 3: 音频驱动口型（图片 + 音频） */
+    /** 示例 3: 音频驱动口型（图片 + 音频，全能模式） */
     public void exampleAudioLipsync() throws Exception {
         System.out.println("\n" + "=".repeat(60));
         System.out.println("示例 3: 音频驱动口型（图片 + 音频）");
         System.out.println("=".repeat(60));
 
-        String taskId = createTask(
-                "@图片1 角色说话，配合 @音频1 的内容，表情自然生动",
+        String taskId = createOmniTask(
+                "@image_file_1 角色说话，配合 @audio_file_1 的内容，表情自然生动",
+                new String[]{"https://your-character-image.png"},
+                null,
+                new String[]{"https://your-audio-file.mp3"},
+                "16:9", 5, "seedance_2.0_fast"
+        );
+        waitForResult(taskId);
+    }
+
+    /** 示例 4: 首尾帧视频生成 */
+    public void exampleFirstLastFrames() throws Exception {
+        System.out.println("\n" + "=".repeat(60));
+        System.out.println("示例 4: 首尾帧视频生成");
+        System.out.println("=".repeat(60));
+
+        String taskId = createFramesTask(
+                "镜头从首帧缓缓过渡到尾帧，画面流畅自然，电影级光影效果",
                 new String[]{
-                        "https://your-character-image.png",
-                        "https://your-audio-file.mp3"
+                        "https://your-first-frame.png",
+                        "https://your-last-frame.png"
                 },
-                "16:9", "5", "seedance_2.0_fast"
+                "16:9", 5, "seedance_2.0_fast"
         );
         waitForResult(taskId);
     }
@@ -324,8 +395,11 @@ public class Demo {
                 case 3:
                     demo.exampleAudioLipsync();
                     break;
+                case 4:
+                    demo.exampleFirstLastFrames();
+                    break;
                 default:
-                    System.err.println("错误: 无效的示例编号 " + exampleNum + "，可选 1/2/3");
+                    System.err.println("错误: 无效的示例编号 " + exampleNum + "，可选 1/2/3/4");
                     System.exit(1);
             }
         } catch (Exception e) {

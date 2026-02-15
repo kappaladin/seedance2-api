@@ -11,7 +11,8 @@ Seedance 2.0 全能模型 API 调用示例。基于 [速推AI](https://www.xskil
 Seedance 2.0 是字节跳动推出的新一代 AI 视频生成模型，核心能力包括：
 
 - **多模态混合输入** — 支持图片/视频/音频混合输入（最多 9 张图 + 3 段视频 + 3 段音频）
-- **@引用语法** — 通过 `@图片1`、`@视频1` 等语法精确控制每个素材的作用
+- **@引用语法** — 通过 `@image_file_1`、`@video_file_1`、`@audio_file_1` 精确控制每个素材的作用（也兼容旧版 `@图片1`、`@视频1`）
+- **双功能模式** — 全能模式（Omni Reference）和首尾帧模式（First/Last Frames）
 - **原生音画同步** — 支持音素级口型同步（8+ 种语言）
 - **多镜头叙事** — 可从单条提示词生成多镜头连贯叙事
 - **影院级画质** — 输出最高 2K 分辨率，时长 4-15 秒，生成约 60 秒完成
@@ -52,37 +53,71 @@ Seedance 2.0 是字节跳动推出的新一代 AI 视频生成模型，核心能
 Authorization: Bearer sk-your-api-key
 ```
 
+### 功能模式
+
+Seedance 2.0 支持两种功能模式：
+
+| 模式 | 说明 | 素材参数 |
+|------|------|---------|
+| `omni_reference` | **全能模式（默认）** — 多模态混合，分别传入图片/视频/音频数组 | `image_files`、`video_files`、`audio_files` |
+| `first_last_frames` | **首尾帧模式** — 文/图生视频，通过首帧/尾帧图片控制 | `filePaths` |
+
 ### 请求参数
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | `model` | string | 是 | 模型 ID，固定为 `st-ai/super-seed2` |
-| `params.prompt` | string | 是 | 提示词，支持 `@图片1`、`@视频1` 等引用 media_files 中的文件 |
-| `params.media_files` | array | 是 | 媒体文件 URL 列表，至少 1 个。支持图片、视频、音频混合输入（视频建议不超过 15 秒） |
-| `params.aspect_ratio` | string | 否 | 画面比例，如 `16:9`、`9:16`、`1:1` |
-| `params.duration` | string | 否 | 视频时长（秒），范围 4-15 |
-| `params.model` | string | 否 | 速度模式：`Fast`（快速，默认）/ `标准` |
-| `channel` | null | 否 | 渠道，默认 null |
+| `params.model` | string | 否 | 速度模式：`seedance_2.0_fast`（快速，默认）/ `seedance_2.0`（标准） |
+| `params.prompt` | string | 是 | 提示词。支持 `@image_file_1`、`@video_file_1`、`@audio_file_1` 引用素材（也兼容旧版 `@图片1`、`@视频1`、`@音频1`） |
+| `params.functionMode` | string | 否 | 功能模式：`omni_reference`（全能模式，默认）/ `first_last_frames`（首尾帧模式） |
+| `params.ratio` | string | 否 | 视频宽高比：`21:9` / `16:9` / `4:3` / `1:1` / `3:4` / `9:16` |
+| `params.duration` | integer | 否 | 视频时长（秒），4-15 整数，默认 `5` |
+| `params.image_files` | array | 否 | 参考图片 URL 数组（omni_reference 模式，最多 9 张）。数组中第 N 个元素对应 `@image_file_N` |
+| `params.video_files` | array | 否 | 参考视频 URL 数组（omni_reference 模式，最多 3 个，总时长 ≤ 15 秒）。数组中第 N 个元素对应 `@video_file_N` |
+| `params.audio_files` | array | 否 | 参考音频 URL 数组（omni_reference 模式，最多 3 个）。数组中第 N 个元素对应 `@audio_file_N` |
+| `params.filePaths` | array | 否 | 图片 URL 数组（first_last_frames 模式）。0 张：文生视频；1 张：图生视频（首帧）；2 张：首尾帧视频 |
 
 ### cURL 示例
 
 ```bash
-# 创建任务
+# 示例 1: 全能模式（图片 + 视频）
 curl -X POST "https://api.xskill.ai/api/v3/tasks/create" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer sk-your-api-key" \
   -d '{
     "model": "st-ai/super-seed2",
     "params": {
-      "prompt": "@图片1 让角色参考 @视频1 的动作和运镜风格进行表演，电影级光影",
-      "media_files": [
-        "https://your-image-url.png",
-        "https://your-video-url.mp4"
+      "model": "seedance_2.0_fast",
+      "prompt": "@image_file_1 中的人物按照 @video_file_1 的动作和运镜风格进行表演，电影级光影",
+      "functionMode": "omni_reference",
+      "image_files": [
+        "https://your-character-image.png"
       ],
-      "aspect_ratio": "16:9",
-      "duration": "5"
-    },
-    "channel": null
+      "video_files": [
+        "https://your-reference-video.mp4"
+      ],
+      "ratio": "16:9",
+      "duration": 5
+    }
+  }'
+
+# 示例 2: 首尾帧模式
+curl -X POST "https://api.xskill.ai/api/v3/tasks/create" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sk-your-api-key" \
+  -d '{
+    "model": "st-ai/super-seed2",
+    "params": {
+      "model": "seedance_2.0_fast",
+      "prompt": "镜头从首帧缓缓过渡到尾帧，画面流畅自然，电影级光影效果",
+      "functionMode": "first_last_frames",
+      "filePaths": [
+        "https://your-first-frame.png",
+        "https://your-last-frame.png"
+      ],
+      "ratio": "16:9",
+      "duration": 5
+    }
   }'
 
 # 查询任务结果（使用返回的 task_id）
@@ -104,18 +139,22 @@ headers = {
     "Authorization": "Bearer sk-your-api-key"
 }
 
+# 全能模式：图片 + 视频
 payload = {
     "model": "st-ai/super-seed2",
     "params": {
-        "prompt": "@图片1 让角色参考 @视频1 的动作和运镜风格进行表演，电影级光影",
-        "media_files": [
-            "https://your-image-url.png",
-            "https://your-video-url.mp4"
+        "model": "seedance_2.0_fast",
+        "prompt": "@image_file_1 中的人物按照 @video_file_1 的动作和运镜风格进行表演，电影级光影",
+        "functionMode": "omni_reference",
+        "image_files": [
+            "https://your-character-image.png"
         ],
-        "aspect_ratio": "16:9",
-        "duration": "5"
-    },
-    "channel": None
+        "video_files": [
+            "https://your-reference-video.mp4"
+        ],
+        "ratio": "16:9",
+        "duration": 5
+    }
 }
 
 # 创建任务
@@ -151,7 +190,7 @@ while True:
 const API_KEY = "sk-your-api-key";
 const BASE_URL = "https://api.xskill.ai";
 
-// 创建任务
+// 创建任务（全能模式）
 async function createTask() {
   const response = await fetch(`${BASE_URL}/api/v3/tasks/create`, {
     method: "POST",
@@ -160,17 +199,20 @@ async function createTask() {
       "Authorization": `Bearer ${API_KEY}`
     },
     body: JSON.stringify({
-      "model": "st-ai/super-seed2",
-      "params": {
-        "prompt": "@图片1 让角色参考 @视频1 的动作和运镜风格进行表演，电影级光影",
-        "media_files": [
-          "https://your-image-url.png",
-          "https://your-video-url.mp4"
+      model: "st-ai/super-seed2",
+      params: {
+        model: "seedance_2.0_fast",
+        prompt: "@image_file_1 中的人物按照 @video_file_1 的动作和运镜风格进行表演，电影级光影",
+        functionMode: "omni_reference",
+        image_files: [
+          "https://your-character-image.png"
         ],
-        "aspect_ratio": "16:9",
-        "duration": "5"
-      },
-      "channel": null
+        video_files: [
+          "https://your-reference-video.mp4"
+        ],
+        ratio: "16:9",
+        duration: 5
+      }
     })
   });
 
@@ -317,9 +359,9 @@ Authorization: Bearer YOUR_API_KEY
 
 配置完成后，在 AI 编辑器中直接对话即可使用：
 
-> **用户：** 帮我用 st-ai/super-seed2 生成一张图片
+> **用户：** 帮我用 st-ai/super-seed2 生成一个视频
 >
-> **Agent：** 好的，我来帮你调用 st-ai/super-seed2 生成图片...
+> **Agent：** 好的，我来帮你调用 st-ai/super-seed2 生成视频...
 
 **提示：**
 - MCP 会自动识别模型能力并调用对应工具
@@ -405,7 +447,7 @@ Agent：
      12-15秒：品牌文字渐显 "Lucky Coffee"
   3. 提交 Seedance 2.0 视频任务...
   4. 视频生成中，预计 10 分钟...
-  5. ✅ 视频生成完成！[视频链接]
+  5. 视频生成完成！[视频链接]
 ```
 
 ### 支持的创作场景
@@ -419,6 +461,7 @@ Agent：
 | 视频延长 | 在已有视频基础上续拍 | "将这个视频延长 10 秒" |
 | 剧情颠覆 | 修改已有视频的剧情 | "把结局改成反转" |
 | 创意转场 | 多场景穿梭 | "科幻世界穿梭转场" |
+| 首尾帧视频 | 控制起始和结束画面 | "日出到日落延时转场" |
 
 > **提示：** Skill 内置了丰富的分镜模板（叙事类、产品类、动作类、风景类等）和镜头运动词汇表，Agent 会根据你的需求自动选择最合适的模板。
 
@@ -426,46 +469,88 @@ Agent：
 
 ## 使用案例
 
-### 案例 1：角色动作迁移（图片+视频）
+### 案例 1：角色动作迁移（全能模式 — 图片+视频）
 
 将图片中的角色按照视频的动作和运镜风格进行表演。
 
 ```json
 {
-  "prompt": "@图片1 让角色参考 @视频1 的动作和运镜风格进行表演，电影级光影",
-  "media_files": [
-    "https://your-character-image.png",
-    "https://your-reference-video.mp4"
-  ],
-  "aspect_ratio": "16:9",
-  "duration": "5"
+  "model": "st-ai/super-seed2",
+  "params": {
+    "prompt": "@image_file_1 中的人物按照 @video_file_1 的动作和运镜风格进行表演，电影级光影",
+    "functionMode": "omni_reference",
+    "image_files": ["https://your-character-image.png"],
+    "video_files": ["https://your-reference-video.mp4"],
+    "ratio": "16:9",
+    "duration": 5
+  }
 }
 ```
 
-### 案例 2：单图生成视频
+### 案例 2：单图生成视频（全能模式）
 
 从单张图片生成动态视频。
 
 ```json
 {
-  "prompt": "@图片1 角色在森林中缓步行走，阳光透过树叶洒下斑驳光影，微风吹动发丝",
-  "media_files": [
-    "https://your-character-image.png"
-  ],
-  "aspect_ratio": "9:16",
-  "duration": "8"
+  "model": "st-ai/super-seed2",
+  "params": {
+    "prompt": "@image_file_1 角色在森林中缓步行走，阳光透过树叶洒下斑驳光影，微风吹动发丝",
+    "functionMode": "omni_reference",
+    "image_files": ["https://your-character-image.png"],
+    "ratio": "9:16",
+    "duration": 8
+  }
+}
+```
+
+### 案例 3：首尾帧视频
+
+生成从首帧过渡到尾帧的视频。
+
+```json
+{
+  "model": "st-ai/super-seed2",
+  "params": {
+    "prompt": "镜头从首帧缓缓过渡到尾帧，画面流畅自然，电影级光影效果",
+    "functionMode": "first_last_frames",
+    "filePaths": [
+      "https://your-first-frame.png",
+      "https://your-last-frame.png"
+    ],
+    "ratio": "16:9",
+    "duration": 5
+  }
+}
+```
+
+### 案例 4：音频驱动口型（全能模式 — 图片+音频）
+
+```json
+{
+  "model": "st-ai/super-seed2",
+  "params": {
+    "prompt": "@image_file_1 角色说话，配合 @audio_file_1 的内容，表情自然生动",
+    "functionMode": "omni_reference",
+    "image_files": ["https://your-character-image.png"],
+    "audio_files": ["https://your-audio-file.mp3"],
+    "ratio": "16:9",
+    "duration": 5
+  }
 }
 ```
 
 ### 更多玩法
 
-| 场景 | prompt 示例 | 输入素材 |
-|------|-------------|----------|
-| 角色动作迁移 | `@图片1 让角色参考 @视频1 的动作进行表演` | 1 张图 + 1 段视频 |
-| 单图动态化 | `@图片1 角色缓缓转头微笑，微风吹动头发` | 1 张图 |
-| 多角色互动 | `@图片1 和 @图片2 两个角色面对面交谈` | 2 张图 |
-| 音频驱动口型 | `@图片1 角色说话，配合 @音频1 的内容` | 1 张图 + 1 段音频 |
-| 场景转换 | `从 @图片1 的场景平滑过渡到 @图片2 的场景` | 2 张图 |
+| 场景 | prompt 示例 | 功能模式 | 输入素材 |
+|------|-------------|---------|----------|
+| 角色动作迁移 | `@image_file_1 中的人物按照 @video_file_1 的动作进行表演` | omni_reference | image_files + video_files |
+| 单图动态化 | `@image_file_1 角色缓缓转头微笑，微风吹动头发` | omni_reference | image_files |
+| 多角色互动 | `@image_file_1 和 @image_file_2 两个角色面对面交谈` | omni_reference | image_files |
+| 音频驱动口型 | `@image_file_1 角色说话，配合 @audio_file_1 的内容` | omni_reference | image_files + audio_files |
+| 场景转换 | `从 @image_file_1 的场景平滑过渡到 @image_file_2 的场景` | omni_reference | image_files |
+| 首尾帧视频 | `镜头从首帧缓缓过渡到尾帧` | first_last_frames | filePaths |
+| 纯文本生视频 | `日落海边，波浪轻轻拍打沙滩` | first_last_frames | （无） |
 
 ---
 

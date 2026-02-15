@@ -53,28 +53,56 @@ async function postRequest(url, body) {
 /**
  * 创建视频生成任务
  * @param {object} options
- * @param {string} options.prompt       提示词，支持 @图片1、@视频1 等引用语法
- * @param {string[]} options.mediaFiles 媒体文件 URL 列表
- * @param {string} [options.aspectRatio="16:9"] 画面比例
- * @param {string} [options.duration="5"]       视频时长（秒），4-15
+ * @param {string} options.prompt          提示词，支持 @image_file_1/@video_file_1/@audio_file_1 引用语法
+ * @param {string[]} [options.imageFiles]  参考图片 URL 列表（omni_reference 模式，最多 9 张）
+ * @param {string[]} [options.videoFiles]  参考视频 URL 列表（omni_reference 模式，最多 3 个）
+ * @param {string[]} [options.audioFiles]  参考音频 URL 列表（omni_reference 模式，最多 3 个）
+ * @param {string[]} [options.filePaths]   图片 URL 列表（first_last_frames 模式：0张=文生视频，1张=首帧，2张=首尾帧）
+ * @param {string} [options.functionMode="omni_reference"]  功能模式：omni_reference / first_last_frames
+ * @param {string} [options.ratio="16:9"]  画面比例：21:9 / 16:9 / 4:3 / 1:1 / 3:4 / 9:16
+ * @param {number} [options.duration=5]    视频时长（秒），4-15
  * @param {string} [options.mode="seedance_2.0_fast"] 速度模式：seedance_2.0_fast / seedance_2.0
  * @returns {Promise<object>} API 响应
  */
-async function createTask({ prompt, mediaFiles, aspectRatio = "16:9", duration = "5", mode = "seedance_2.0_fast" }) {
-  const payload = {
-    model: MODEL_ID,
-    params: {
-      prompt,
-      media_files: mediaFiles,
-      aspect_ratio: aspectRatio,
-      duration,
-      model: mode,
-    },
-    channel: null,
+async function createTask({
+  prompt,
+  imageFiles,
+  videoFiles,
+  audioFiles,
+  filePaths,
+  functionMode = "omni_reference",
+  ratio = "16:9",
+  duration = 5,
+  mode = "seedance_2.0_fast",
+}) {
+  const params = {
+    prompt,
+    functionMode,
+    ratio,
+    duration,
+    model: mode,
   };
 
+  // 根据功能模式设置素材参数
+  if (functionMode === "omni_reference") {
+    if (imageFiles?.length) params.image_files = imageFiles;
+    if (videoFiles?.length) params.video_files = videoFiles;
+    if (audioFiles?.length) params.audio_files = audioFiles;
+  } else if (functionMode === "first_last_frames") {
+    if (filePaths?.length) params.filePaths = filePaths;
+  }
+
+  const payload = {
+    model: MODEL_ID,
+    params,
+  };
+
+  console.log(`[创建任务] 功能模式: ${functionMode}`);
   console.log(`[创建任务] 提示词: ${prompt}`);
-  console.log(`[创建任务] 媒体文件: ${mediaFiles.join(", ")}`);
+  if (imageFiles?.length) console.log(`[创建任务] 参考图片: ${imageFiles.join(", ")}`);
+  if (videoFiles?.length) console.log(`[创建任务] 参考视频: ${videoFiles.join(", ")}`);
+  if (audioFiles?.length) console.log(`[创建任务] 参考音频: ${audioFiles.join(", ")}`);
+  if (filePaths?.length) console.log(`[创建任务] 首尾帧图片: ${filePaths.join(", ")}`);
 
   const result = await postRequest(CREATE_URL, payload);
 
@@ -111,14 +139,14 @@ async function waitForResult(taskId) {
     console.log(`[轮询] ${elapsed / 1000}s - 状态: ${status}`);
 
     if (status === "completed") {
-      const videoUrl = result.data.output?.video_url || "";
+      const videoUrl = result.data?.result?.output?.images?.[0] || "";
       console.log(`\n[完成] 视频生成成功!`);
       console.log(`[完成] 视频地址: ${videoUrl}`);
       return result;
     }
 
     if (status === "failed") {
-      const errorMsg = result.data.output?.error || "未知错误";
+      const errorMsg = result.data?.error || "未知错误";
       throw new Error(`任务失败: ${errorMsg}`);
     }
 
@@ -133,55 +161,71 @@ async function waitForResult(taskId) {
 // 使用示例
 // ============================================================
 
-/** 示例 1: 单图生成视频 */
+/** 示例 1: 单图生成视频（全能模式） */
 async function exampleSingleImage() {
   console.log("\n" + "=".repeat(60));
-  console.log("示例 1: 单图生成视频");
+  console.log("示例 1: 单图生成视频（全能模式）");
   console.log("=".repeat(60));
 
   const result = await createTask({
-    prompt: "@图片1 角色在森林中缓步行走，阳光透过树叶洒下斑驳光影，微风吹动发丝",
-    mediaFiles: ["https://your-character-image.png"],
-    aspectRatio: "9:16",
-    duration: "8",
+    prompt: "@image_file_1 角色在森林中缓步行走，阳光透过树叶洒下斑驳光影，微风吹动发丝",
+    imageFiles: ["https://your-character-image.png"],
+    ratio: "9:16",
+    duration: 8,
   });
 
   await waitForResult(result.data.task_id);
 }
 
-/** 示例 2: 角色动作迁移（图片 + 视频） */
+/** 示例 2: 角色动作迁移（图片 + 视频，全能模式） */
 async function exampleImageAndVideo() {
   console.log("\n" + "=".repeat(60));
   console.log("示例 2: 角色动作迁移（图片 + 视频）");
   console.log("=".repeat(60));
 
   const result = await createTask({
-    prompt: "@图片1 让角色参考 @视频1 的动作和运镜风格进行表演，电影级光影",
-    mediaFiles: [
-      "https://your-character-image.png",
-      "https://your-reference-video.mp4",
-    ],
-    aspectRatio: "16:9",
-    duration: "5",
+    prompt: "@image_file_1 中的人物按照 @video_file_1 的动作和运镜风格进行表演，电影级光影",
+    imageFiles: ["https://your-character-image.png"],
+    videoFiles: ["https://your-reference-video.mp4"],
+    ratio: "16:9",
+    duration: 5,
   });
 
   await waitForResult(result.data.task_id);
 }
 
-/** 示例 3: 音频驱动口型（图片 + 音频） */
+/** 示例 3: 音频驱动口型（图片 + 音频，全能模式） */
 async function exampleAudioLipsync() {
   console.log("\n" + "=".repeat(60));
   console.log("示例 3: 音频驱动口型（图片 + 音频）");
   console.log("=".repeat(60));
 
   const result = await createTask({
-    prompt: "@图片1 角色说话，配合 @音频1 的内容，表情自然生动",
-    mediaFiles: [
-      "https://your-character-image.png",
-      "https://your-audio-file.mp3",
+    prompt: "@image_file_1 角色说话，配合 @audio_file_1 的内容，表情自然生动",
+    imageFiles: ["https://your-character-image.png"],
+    audioFiles: ["https://your-audio-file.mp3"],
+    ratio: "16:9",
+    duration: 5,
+  });
+
+  await waitForResult(result.data.task_id);
+}
+
+/** 示例 4: 首尾帧视频生成（first_last_frames 模式） */
+async function exampleFirstLastFrames() {
+  console.log("\n" + "=".repeat(60));
+  console.log("示例 4: 首尾帧视频生成");
+  console.log("=".repeat(60));
+
+  const result = await createTask({
+    prompt: "镜头从首帧缓缓过渡到尾帧，画面流畅自然，电影级光影效果",
+    filePaths: [
+      "https://your-first-frame.png",
+      "https://your-last-frame.png",
     ],
-    aspectRatio: "16:9",
-    duration: "5",
+    functionMode: "first_last_frames",
+    ratio: "16:9",
+    duration: 5,
   });
 
   await waitForResult(result.data.task_id);
@@ -203,11 +247,12 @@ async function main() {
     1: exampleSingleImage,
     2: exampleImageAndVideo,
     3: exampleAudioLipsync,
+    4: exampleFirstLastFrames,
   };
 
   const runExample = examples[exampleNum];
   if (!runExample) {
-    console.error(`错误: 无效的示例编号 ${exampleNum}，可选 1/2/3`);
+    console.error(`错误: 无效的示例编号 ${exampleNum}，可选 1/2/3/4`);
     process.exit(1);
   }
 
