@@ -4,7 +4,7 @@ Seedance 2.0 API Python 调用示例
 使用方法:
   1. 安装依赖: pip install requests
   2. 运行示例: python demo.py --api-key sk-your-api-key
-  3. 或设置环境变量: export SUTUI_API_KEY=sk-your-api-key && python demo.py
+  3. 或设置环境变量: export XSKILL_API_KEY=sk-your-api-key && python demo.py
 
 获取 API Key: https://www.xskill.ai/#/v2/api-keys
 模型文档:   https://www.xskill.ai/#/v2/models?model=st-ai%2Fsuper-seed2
@@ -271,8 +271,8 @@ def main():
     parser = argparse.ArgumentParser(description="Seedance 2.0 API Python Demo")
     parser.add_argument(
         "--api-key",
-        default=os.environ.get("SUTUI_API_KEY", ""),
-        help="API Key (也可通过环境变量 SUTUI_API_KEY 设置)",
+        default=os.environ.get("XSKILL_API_KEY", ""),
+        help="API Key (也可通过环境变量 XSKILL_API_KEY 设置)",
     )
     parser.add_argument(
         "--example",
@@ -286,7 +286,7 @@ def main():
     if not args.api_key:
         print("错误: 请提供 API Key")
         print("  方式1: python demo.py --api-key sk-your-api-key")
-        print("  方式2: export SUTUI_API_KEY=sk-your-api-key && python demo.py")
+        print("  方式2: export XSKILL_API_KEY=sk-your-api-key && python demo.py")
         print("\n获取 API Key: https://www.xskill.ai/#/v2/api-keys")
         sys.exit(1)
 

@@ -3,8 +3,8 @@
  *
  * 使用方法:
  *   1. 需要 Node.js 18+（内置 fetch）
- *   2. 运行示例: SUTUI_API_KEY=sk-your-api-key node demo.js
- *   3. 指定示例: SUTUI_API_KEY=sk-your-api-key node demo.js 2
+ *   2. 运行示例: XSKILL_API_KEY=sk-your-api-key node demo.js
+ *   3. 指定示例: XSKILL_API_KEY=sk-your-api-key node demo.js 2
  *
  * 获取 API Key: https://www.xskill.ai/#/v2/api-keys
  * 模型文档:   https://www.xskill.ai/#/v2/models?model=st-ai%2Fsuper-seed2
@@ -18,7 +18,7 @@ const CREATE_URL = `${BASE_URL}/api/v3/tasks/create`;
 const QUERY_URL = `${BASE_URL}/api/v3/tasks/query`;
 const MODEL_ID = "st-ai/super-seed2";
 
-const API_KEY = process.env.SUTUI_API_KEY || "sk-your-api-key";
+const API_KEY = process.env.XSKILL_API_KEY || "sk-your-api-key";
 const POLL_INTERVAL = 5000;   // 轮询间隔（毫秒）
 const MAX_POLL_TIME = 600000; // 最大等待时间（毫秒）
 
@@ -237,7 +237,7 @@ async function exampleFirstLastFrames() {
 async function main() {
   if (API_KEY === "sk-your-api-key") {
     console.error("错误: 请提供 API Key");
-    console.error("  运行方式: SUTUI_API_KEY=sk-your-api-key node demo.js");
+    console.error("  运行方式: XSKILL_API_KEY=sk-your-api-key node demo.js");
     console.error("\n获取 API Key: https://www.xskill.ai/#/v2/api-keys");
     process.exit(1);
   }

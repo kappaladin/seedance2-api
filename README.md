@@ -327,7 +327,7 @@ irm https://api.xskill.ai/install-mcp.ps1 | iex
 ```json
 {
   "mcpServers": {
-    "sutui-ai": {
+    "xskill-ai": {
       "command": "npx",
       "args": [
         "-y",
@@ -335,7 +335,7 @@ irm https://api.xskill.ai/install-mcp.ps1 | iex
         "https://api.xskill.ai/api/v3/mcp-http"
       ],
       "env": {
-        "SUTUI_API_KEY": "YOUR_API_KEY"
+        "XSKILL_API_KEY": "YOUR_API_KEY"
       }
     }
   }

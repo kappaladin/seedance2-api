@@ -2,7 +2,7 @@
 
 # Seedance 2.0 API 使用指南
 
-Seedance 2.0 全能模型 API 调用示例。基于 [速推AI](https://www.xskill.ai/#/v2/models?model=st-ai%2Fsuper-seed2) 平台接入字节跳动新一代 AI 视频生成模型。
+Seedance 2.0 全能模型 API 调用示例。基于 [Xskill AI](https://www.xskill.ai/#/v2/models?model=st-ai%2Fsuper-seed2) 平台接入字节跳动新一代 AI 视频生成模型。
 
 ## 模型简介
 
@@ -30,7 +30,7 @@ Seedance 2.0 是字节跳动推出的新一代 AI 视频生成模型，核心能
 
 ## 前置准备
 
-1. 前往 [速推AI](https://www.xskill.ai) 注册账号
+1. 前往 [Xskill AI](https://www.xskill.ai) 注册账号
 2. 在 [API Key 页面](https://www.xskill.ai/#/v2/api-key) 创建 API Key
 3. 获取积分用于调用
 
@@ -327,7 +327,7 @@ irm https://api.xskill.ai/install-mcp.ps1 | iex
 ```json
 {
   "mcpServers": {
-    "sutui-ai": {
+    "xskill-ai": {
       "command": "npx",
       "args": [
         "-y",
@@ -335,7 +335,7 @@ irm https://api.xskill.ai/install-mcp.ps1 | iex
         "https://api.xskill.ai/api/v3/mcp-http"
       ],
       "env": {
-        "SUTUI_API_KEY": "YOUR_API_KEY"
+        "XSKILL_API_KEY": "YOUR_API_KEY"
       }
     }
   }
@@ -398,7 +398,7 @@ cp -r seedance2-api/.cursor/skills/seedance-storyboard/ your-project/.cursor/ski
 
 在你的项目中创建 `.cursor/skills/seedance-storyboard/` 目录，将本仓库中的 `SKILL.md` 和 `reference.md` 放入其中。
 
-> **前提条件：** 已安装 Cursor 编辑器，已配置 MCP（参考上方"MCP 调用"章节），速推AI 账号已有足够积分。
+> **前提条件：** 已安装 Cursor 编辑器，已配置 MCP（参考上方"MCP 调用"章节），Xskill AI 账号已有足够积分。
 
 ### 使用方式
 
@@ -556,7 +556,7 @@ Agent：
 
 ## 相关链接
 
-- [速推AI 官网](https://www.xskill.ai)
+- [Xskill AI 官网](https://www.xskill.ai)
 - [Seedance 2.0 模型页面](https://www.xskill.ai/#/v2/models?model=st-ai%2Fsuper-seed2)
 - [API Key 管理](https://www.xskill.ai/#/v2/api-key)
 - [任务列表](https://www.xskill.ai/#/v2/tasks)
