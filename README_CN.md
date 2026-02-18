@@ -384,17 +384,33 @@ Cursor Skills 是 Cursor 编辑器中的可复用 AI 工作流模板。安装后
 
 ### 安装 Skill
 
-**方式一：一键安装（推荐）**
+**方式一：通过 skills.sh 一键安装（推荐）**
+
+在你的**项目根目录**下运行，skill 会自动安装到 `.cursor/skills/seedance2-api/`：
 
 ```bash
-# 通过 skills.sh（Vercel）
 npx skills add hexiaochun/seedance2-api
+```
 
-# 或通过 agentskill.sh
+CLI 会提示选择目标 Agent（Cursor、Claude Code、Windsurf 等），加 `--yes` 跳过交互直接安装：
+
+```bash
+npx skills add hexiaochun/seedance2-api --yes
+```
+
+> 在 skills.sh 上查看：[hexiaochun/seedance2-api](https://skills.sh/hexiaochun/seedance2-api/seedance2-api)
+
+**方式二：通过 agentskill.sh 一键安装**
+
+在 Cursor / Claude Code 聊天框中输入：
+
+```
 /learn @hexiaochun/seedance2-api
 ```
 
-**方式二：克隆仓库**
+> 在 agentskill.sh 上查看：搜索 [seedance2-api](https://agentskill.sh/q/seedance2-api)
+
+**方式三：克隆仓库**
 
 ```bash
 # 克隆本仓库
@@ -404,11 +420,11 @@ git clone https://github.com/hexiaochun/seedance2-api.git
 cp -r seedance2-api/.cursor/skills/seedance2-api/ your-project/.cursor/skills/seedance2-api/
 ```
 
-**方式三：手动创建**
+**方式四：手动创建**
 
-在你的项目中创建 `.cursor/skills/seedance2-api/` 目录，将本仓库中的 `SKILL.md` 和 `reference.md` 放入其中。
+在你的项目中创建 `.cursor/skills/seedance2-api/` 目录，将本仓库中的 `SKILL.md`、`reference.md` 和 `scripts/` 目录放入其中。
 
-> **前提条件：** 已安装 Cursor 编辑器，已配置 MCP（参考上方"MCP 调用"章节），Xskill AI 账号已有足够积分。
+> **前提条件：** 已安装 Cursor 编辑器，已配置 MCP（参考上方"MCP 调用"章节）或设置 `XSKILL_API_KEY` 环境变量使用脚本模式。Xskill AI 账号需有足够积分。
 
 ### 使用方式
 

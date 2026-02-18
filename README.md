@@ -384,17 +384,33 @@ Your Idea → Info Gathering → Storyboard Design → Generate Reference Images
 
 ### Install the Skill
 
-**Option 1: One-command install (recommended)**
+**Option 1: One-command install via skills.sh (recommended)**
+
+Run in your **project root** directory. The skill will be installed to `.cursor/skills/seedance2-api/` automatically:
 
 ```bash
-# Via skills.sh (Vercel)
 npx skills add hexiaochun/seedance2-api
+```
 
-# Or via agentskill.sh
+The CLI will prompt you to select target agents (Cursor, Claude Code, Windsurf, etc.). Use `--yes` to skip prompts:
+
+```bash
+npx skills add hexiaochun/seedance2-api --yes
+```
+
+> Browse on skills.sh: [hexiaochun/seedance2-api](https://skills.sh/hexiaochun/seedance2-api/seedance2-api)
+
+**Option 2: One-command install via agentskill.sh**
+
+Type in your Cursor / Claude Code chat:
+
+```
 /learn @hexiaochun/seedance2-api
 ```
 
-**Option 2: Clone the repository**
+> Browse on agentskill.sh: search [seedance2-api](https://agentskill.sh/q/seedance2-api)
+
+**Option 3: Clone the repository**
 
 ```bash
 # Clone this repo
@@ -404,11 +420,11 @@ git clone https://github.com/hexiaochun/seedance2-api.git
 cp -r seedance2-api/.cursor/skills/seedance2-api/ your-project/.cursor/skills/seedance2-api/
 ```
 
-**Option 3: Manual setup**
+**Option 4: Manual setup**
 
-Create a `.cursor/skills/seedance2-api/` directory in your project and copy `SKILL.md` and `reference.md` from this repo into it.
+Create a `.cursor/skills/seedance2-api/` directory in your project and copy `SKILL.md`, `reference.md`, and `scripts/` from this repo into it.
 
-> **Prerequisites:** Cursor editor installed, MCP configured (see "MCP Integration" section above), Xskill AI account with sufficient credits.
+> **Prerequisites:** Cursor editor installed, MCP configured (see "MCP Integration" section above) or set `XSKILL_API_KEY` env var for script fallback mode. Xskill AI account with sufficient credits.
 
 ### How to Use
 
