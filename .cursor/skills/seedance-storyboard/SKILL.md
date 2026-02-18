@@ -1,6 +1,12 @@
 ---
 name: seedance-storyboard
-description: 引导用户将想法转换为 Seedance 2.0 专业分镜提示词，使用 Seedream 4.5 生成参考图，并提交视频生成任务、轮询结果。优先使用 Xskill AI MCP，不可用时自动回退到 Python 脚本。当用户提到"分镜"、"storyboard"、"seedance"、"视频脚本"、"拍个视频"时使用此 skill。
+description: Guides users from creative idea to finished Seedance 2.0 video — builds professional storyboards, generates reference images with Seedream 4.5, submits video generation tasks, and polls for results. Falls back to Python scripts when MCP is unavailable. Use when the user mentions storyboard, seedance, video script, AI video generation, or shot planning.
+license: MIT
+compatibility: Requires Python 3.8+ with requests. Works with Cursor, Claude Code, or any SKILL.md-compatible agent.
+metadata:
+  author: hexiaochun
+  version: "1.0"
+  tags: video-generation ai-video seedance storyboard bytedance seedream
 ---
 
 # Seedance 2.0 分镜创作与视频生成
